@@ -9,7 +9,10 @@ func IsIsogram(value string) bool {
 	value = strings.ToUpper(value)
 
 	for i, char := range value {
-		if char != ' ' && char != '-' && strings.Contains(value[i+1:], string(char)) {
+		if char == ' ' || char == '-'{
+			continue
+		}
+		if strings.Contains(value[i+1:], string(char)) {
 			return false
 		}
 	}
