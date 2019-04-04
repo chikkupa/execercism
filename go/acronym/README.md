@@ -1,4 +1,4 @@
-# Acronym
+## Acronym
 
 Convert a phrase to its acronym.
 
