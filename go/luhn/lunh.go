@@ -1,16 +1,18 @@
 package luhn
 
 import (
-	"fmt"
-	"strings"
 	"regexp"
+	"strings"
 )
 
 // Valid check wether the number is valid
 func Valid(input string) bool {
+	// Replacing all the spaces
 	input = strings.Replace(input, " ", "", -1)
-	match,_ := regexp.MatchString(`[0-9]+`, input)
-	if !match {
+	// Check whether any non number value exist
+	match, _ := regexp.MatchString(`[^0-9]+`, input)
+
+	if match {
 		return false
 	}
 
@@ -19,37 +21,28 @@ func Valid(input string) bool {
 	}
 
 	runeInput := []rune(input)
-	
-	oddFlag := true;
-	if len(runeInput) % 2 == 0 {
-		oddFlag = false
+
+	// To identify the position of second digit to double
+	oddFlag := 1
+	if len(runeInput)%2 == 0 {
+		oddFlag = 0
 	}
 
 	total := 0
 	for i, number := range runeInput {
+		// Character to number
 		number -= rune('0')
-		if oddFlag {
-			if i % 2 == 1 {
-				number *= 2
-				if number > 9 {
-					number -= 9
-				}
-			}
-		} else {
-			if i % 2 == 0 {
-				number *= 2
-				if number > 9 {
-					number -= 9
-				}
+		if i%2 == oddFlag {
+			number *= 2
+			if number > 9 {
+				number -= 9
 			}
 		}
 
 		total += int(number)
 	}
 
-	fmt.Println(total)
-
-	if total % 10 == 0 {
+	if total%10 == 0 {
 		return true
 	}
 
