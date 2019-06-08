@@ -31,11 +31,11 @@ func ConcurrentFrequency(sentences []string) FreqMap {
 func (rm *RuneSyncMap) getFrequency(s string, c chan int) {
 	ch := make(chan int)
 
-	for _, r := range s {
-		go rm.incrementFrequency(r, ch)
+	for index, count := range Frequency(s) {
+		go rm.incrementFrequency(index, count, ch)
 	}
 
-	for range s {
+	for range Frequency(s) {
 	_:
 		<-ch
 	}
@@ -44,9 +44,9 @@ func (rm *RuneSyncMap) getFrequency(s string, c chan int) {
 }
 
 // Increment the frequency count
-func (rm *RuneSyncMap) incrementFrequency(r rune, c chan int) {
+func (rm *RuneSyncMap) incrementFrequency(index rune, count int, c chan int) {
 	rm.Lock()
-	rm.freqMap[r]++
+	rm.freqMap[index] += count
 	rm.Unlock()
 
 	c <- 1
