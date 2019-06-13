@@ -1,6 +1,8 @@
 package letter
 
-import "sync"
+import (
+	"sync"
+)
 
 // RuneSyncMap extends sync.RWMutex for FreqMap
 type RuneSyncMap struct {
@@ -8,15 +10,20 @@ type RuneSyncMap struct {
 	freqMap FreqMap
 }
 
+type syncMap struct {
+	sync.Map
+}
+
+var frequencyMap syncMap
+
 // ConcurrentFrequency to calculate frequency of each character parallelly
 func ConcurrentFrequency(sentences []string) FreqMap {
-	runeMap := RuneSyncMap{}
-	runeMap.freqMap = FreqMap{}
+	frequencyMap = syncMap{}
 
 	c := make(chan int)
 
 	for _, sentence := range sentences {
-		go runeMap.getFrequency(sentence, c)
+		go frequencyMap.getFrequency(sentence, c)
 	}
 
 	for range sentences {
@@ -24,11 +31,18 @@ func ConcurrentFrequency(sentences []string) FreqMap {
 		<-c
 	}
 
-	return runeMap.freqMap
+	var freqMap = FreqMap{}
+
+	frequencyMap.Range(func(key, value interface{}) bool {
+		freqMap[key.(rune)] = value.(int)
+		return true
+	})
+
+	return freqMap
 }
 
 // Calculate the frequency of each character in the string
-func (rm *RuneSyncMap) getFrequency(s string, c chan int) {
+func (rm *syncMap) getFrequency(s string, c chan int) {
 	ch := make(chan int)
 
 	for index, count := range Frequency(s) {
@@ -44,10 +58,14 @@ func (rm *RuneSyncMap) getFrequency(s string, c chan int) {
 }
 
 // Increment the frequency count
-func (rm *RuneSyncMap) incrementFrequency(index rune, count int, c chan int) {
-	rm.Lock()
-	rm.freqMap[index] += count
-	rm.Unlock()
+func (rm *syncMap) incrementFrequency(index rune, count int, c chan int) {
+	currentFrequency, ok := rm.Load(index)
+
+	if ok {
+		rm.Store(index, count+currentFrequency.(int))
+	} else {
+		rm.Store(index, count)
+	}
 
 	c <- 1
 }
