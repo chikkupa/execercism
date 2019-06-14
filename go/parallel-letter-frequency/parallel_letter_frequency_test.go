@@ -1,6 +1,7 @@
 package letter
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 )
@@ -51,6 +52,14 @@ func OriginalFrequency(s string) FreqMap {
 func TestConcurrentFrequency(t *testing.T) {
 	seq := OriginalFrequency(euro + dutch + us)
 	con := ConcurrentFrequency([]string{euro, dutch, us})
+
+	for i := rune(0); i <= rune(256); i++ {
+		if seq[i] != con[i] {
+			fmt.Printf("Mismatch: %c seq[i]: %d con[i]: %d\n", i, seq[i], con[i])
+		}
+	}
+	fmt.Println([]string{euro, dutch, us})
+
 	if !reflect.DeepEqual(con, seq) {
 		t.Fatal("ConcurrentFrequency wrong result")
 	}
