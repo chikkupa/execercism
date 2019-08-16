@@ -1,61 +1,32 @@
 package letter
 
-import "sync"
-
-type syncMap struct {
-	sync.Map
-}
-
-var frequencyMap syncMap
-
 // ConcurrentFrequency to calculate frequency of each character parallelly
 func ConcurrentFrequency(sentences []string) FreqMap {
-	frequencyMap = syncMap{}
+	frequencyMap := FreqMap{}
 
-	c := make(chan int)
+	c := make(chan FreqMap)
 
 	for _, sentence := range sentences {
-		go frequencyMap.getFrequency(sentence, c)
+		go getFrequency(sentence, c)
 	}
 
 	for range sentences {
-		<-c
+		freqMap := <-c
+		for index, count := range freqMap {
+			frequencyMap[index] += count
+		}
 	}
 
-	var freqMap = FreqMap{}
-
-	frequencyMap.Range(func(key, value interface{}) bool {
-		freqMap[key.(rune)] = value.(int)
-		return true
-	})
-
-	return freqMap
+	return frequencyMap
 }
 
 // Calculate the frequency of each character in the string
-func (sm *syncMap) getFrequency(s string, c chan int) {
-	ch := make(chan int)
+func getFrequency(s string, c chan FreqMap) {
+	freqMap := FreqMap{}
 
 	for index, count := range Frequency(s) {
-		go sm.incrementFrequency(index, count, ch)
+		freqMap[index] += count
 	}
 
-	for range Frequency(s) {
-		<-ch
-	}
-
-	c <- 1
-}
-
-// Increment the frequency count
-func (sm *syncMap) incrementFrequency(index rune, count int, c chan int) {
-	currentFrequency, ok := sm.Load(index)
-
-	if ok {
-		sm.Store(index, count+currentFrequency.(int))
-	} else {
-		sm.Store(index, count)
-	}
-
-	c <- 1
+	c <- freqMap
 }
