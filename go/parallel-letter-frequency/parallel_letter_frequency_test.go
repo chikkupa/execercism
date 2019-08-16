@@ -58,7 +58,7 @@ func TestConcurrentFrequency(t *testing.T) {
 			fmt.Printf("Mismatch: %c seq[i]: %d con[i]: %d\n", i, seq[i], con[i])
 		}
 	}
-	fmt.Println([]string{euro, dutch, us})
+	// fmt.Println([]string{euro, dutch, us})
 
 	if !reflect.DeepEqual(con, seq) {
 		t.Fatal("ConcurrentFrequency wrong result")
