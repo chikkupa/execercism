@@ -7,7 +7,9 @@ func ConcurrentFrequency(sentences []string) FreqMap {
 	c := make(chan FreqMap)
 
 	for _, sentence := range sentences {
-		go getFrequency(sentence, c)
+		go func(sentence string, c chan FreqMap) {
+			c <- Frequency(sentence)
+		}(sentence, c)
 	}
 
 	for range sentences {
@@ -18,15 +20,4 @@ func ConcurrentFrequency(sentences []string) FreqMap {
 	}
 
 	return frequencyMap
-}
-
-// Calculate the frequency of each character in the string
-func getFrequency(s string, c chan FreqMap) {
-	freqMap := FreqMap{}
-
-	for index, count := range Frequency(s) {
-		freqMap[index] += count
-	}
-
-	c <- freqMap
 }
