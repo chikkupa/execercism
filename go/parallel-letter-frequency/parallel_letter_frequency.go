@@ -4,12 +4,12 @@ package letter
 func ConcurrentFrequency(sentences []string) FreqMap {
 	frequencyMap := FreqMap{}
 
-	c := make(chan FreqMap)
+	c := make(chan FreqMap, 8)
 
 	for _, sentence := range sentences {
-		go func(sentence string, c chan FreqMap) {
+		go func(sentence string) {
 			c <- Frequency(sentence)
-		}(sentence, c)
+		}(sentence)
 	}
 
 	for range sentences {
