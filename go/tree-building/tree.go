@@ -1,5 +1,9 @@
 package tree
 
+import(
+	"errors"
+)
+
 // Record Struct for containing id and parent
 type Record struct {
 	ID     int
@@ -14,8 +18,29 @@ type Node struct {
 
 // Build Builds a tree structure from array of records
 func Build(records []Record) (*Node, error) {
+	records = sortRecords(records)
 	var tree *Node
-	for _, record := range records {
+
+	if(len(records) > 0 && records[0].ID != 0){
+		return tree, errors.New("no root node")
+	}
+
+	for index, record := range records {
+		if record.ID == 0 && record.Parent != 0 {
+			return tree, errors.New("root node has parent")
+		}
+		if index + 1 < len(records) && records[index].ID == records[index + 1].ID {
+			return tree, errors.New("duplicate node")
+		}
+		if record.ID != index {
+			return tree, errors.New("non-continuous")
+		}
+		if record.ID != 0 && record.ID == record.Parent {
+			return tree, errors.New("cycle directly")
+		}
+		if record.ID < record.Parent {
+			return tree, errors.New("higher id parent of lower id")
+		}
 		if record.ID == 0 && tree == nil {
 			tree = &Node{ID: record.ID}
 		} else if record.ID == 0 && tree != nil {
@@ -28,6 +53,17 @@ func Build(records []Record) (*Node, error) {
 	}
 
 	return tree, nil
+}
+
+func sortRecords(records []Record) []Record {
+	for i := 0; i < len(records) - 1; i++ {
+		for j :=0; j < len(records) - i - 1; j++ {
+			if(records[j].ID > records[j+1].ID){
+				records[j], records[j+1] = records[j+1], records[j]
+			}
+		}
+	}
+	return records
 }
 
 func addBranch(tree *Node, record Record) {
