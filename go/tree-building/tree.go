@@ -1,6 +1,6 @@
 package tree
 
-import(
+import (
 	"errors"
 )
 
@@ -21,7 +21,7 @@ func Build(records []Record) (*Node, error) {
 	records = sortRecords(records)
 	var tree *Node
 
-	if(len(records) > 0 && records[0].ID != 0){
+	if len(records) > 0 && records[0].ID != 0 {
 		return tree, errors.New("no root node")
 	}
 
@@ -29,7 +29,7 @@ func Build(records []Record) (*Node, error) {
 		if record.ID == 0 && record.Parent != 0 {
 			return tree, errors.New("root node has parent")
 		}
-		if index + 1 < len(records) && records[index].ID == records[index + 1].ID {
+		if index+1 < len(records) && records[index].ID == records[index+1].ID {
 			return tree, errors.New("duplicate node")
 		}
 		if record.ID != index {
@@ -56,9 +56,9 @@ func Build(records []Record) (*Node, error) {
 }
 
 func sortRecords(records []Record) []Record {
-	for i := 0; i < len(records) - 1; i++ {
-		for j :=0; j < len(records) - i - 1; j++ {
-			if(records[j].ID > records[j+1].ID){
+	for i := 0; i < len(records)-1; i++ {
+		for j := 0; j < len(records)-i-1; j++ {
+			if records[j].ID > records[j+1].ID {
 				records[j], records[j+1] = records[j+1], records[j]
 			}
 		}
