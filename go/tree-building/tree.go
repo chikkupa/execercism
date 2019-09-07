@@ -1,7 +1,8 @@
 package tree
 
-import(
+import (
 	"errors"
+	"sort"
 )
 
 // Record Struct for containing id and parent
@@ -18,18 +19,24 @@ type Node struct {
 
 // Build Builds a tree structure from array of records
 func Build(records []Record) (*Node, error) {
-	records = sortRecords(records)
+	sort.Slice(records, func(i int, j int) bool { return records[i].ID < records[j].ID })
 	var tree *Node
 
-	if(len(records) > 0 && records[0].ID != 0){
+	if len(records) > 0 && records[0].ID != 0 {
 		return tree, errors.New("no root node")
+	}
+
+	mRecords := make(map[int]*Node)
+
+	for _, record := range records {
+		mRecords[record.ID] = &Node{ID: record.ID}
 	}
 
 	for index, record := range records {
 		if record.ID == 0 && record.Parent != 0 {
 			return tree, errors.New("root node has parent")
 		}
-		if index + 1 < len(records) && records[index].ID == records[index + 1].ID {
+		if index+1 < len(records) && records[index].ID == records[index+1].ID {
 			return tree, errors.New("duplicate node")
 		}
 		if record.ID != index {
@@ -42,36 +49,13 @@ func Build(records []Record) (*Node, error) {
 			return tree, errors.New("higher id parent of lower id")
 		}
 		if record.ID == 0 && tree == nil {
-			tree = &Node{ID: record.ID}
-		} else if record.ID == 0 && tree != nil {
-			tree.Children = append(tree.Children, &Node{ID: record.ID})
+			tree = mRecords[record.ID]
 		} else if tree != nil {
-			addBranch(tree, record)
+			mRecords[record.Parent].Children = append(mRecords[record.Parent].Children, mRecords[record.ID])
 		} else {
 			return tree, nil
 		}
 	}
 
 	return tree, nil
-}
-
-func sortRecords(records []Record) []Record {
-	for i := 0; i < len(records) - 1; i++ {
-		for j :=0; j < len(records) - i - 1; j++ {
-			if(records[j].ID > records[j+1].ID){
-				records[j], records[j+1] = records[j+1], records[j]
-			}
-		}
-	}
-	return records
-}
-
-func addBranch(tree *Node, record Record) {
-	if tree.ID == record.Parent {
-		tree.Children = append(tree.Children, &Node{ID: record.ID})
-	} else {
-		for _, children := range tree.Children {
-			addBranch(children, record)
-		}
-	}
 }
