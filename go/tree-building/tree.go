@@ -28,11 +28,9 @@ func Build(records []Record) (*Node, error) {
 
 	mRecords := make(map[int]*Node)
 
-	for _, record := range records {
-		mRecords[record.ID] = &Node{ID: record.ID}
-	}
-
 	for index, record := range records {
+		mRecords[record.ID] = &Node{ID: record.ID}
+
 		if record.ID == 0 && record.Parent != 0 {
 			return tree, errors.New("root node has parent")
 		}
