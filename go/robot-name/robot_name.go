@@ -14,7 +14,7 @@ var record = make(map[Robot]bool)
 // return the name
 func (r *Robot) Name() (string, error) {
 	if *r == "" {
-		r.generateName()
+		return r.generateName()
 	}
 	return string(*r), nil
 }
@@ -22,8 +22,8 @@ func (r *Robot) Name() (string, error) {
 func (r *Robot) generateName() (string, error) {
 	var bName []rune
 
-	if len(record) >= (26*26*1000 - 1) {
-		return "", errors.New("")
+	if len(record) > (26*26*10*10*10 - 1) {
+		return "", errors.New("Namespace exhausted")
 	}
 
 	for true {
@@ -47,6 +47,5 @@ func (r *Robot) generateName() (string, error) {
 
 // Reset Delete the name of the robot and regenerate its name
 func (r *Robot) Reset() (string, error) {
-	// record[*r] = false
 	return r.generateName()
 }
