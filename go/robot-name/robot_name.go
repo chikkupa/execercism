@@ -2,6 +2,7 @@ package robotname
 
 import (
 	"errors"
+	"fmt"
 	"math/rand"
 )
 
@@ -14,27 +15,35 @@ var record = make(map[Robot]bool)
 // return the name
 func (r *Robot) Name() (string, error) {
 	if *r == "" {
-		return r.generateName()
+		if len(record) > (26*26*10*10*10 - 1) {
+			return "", errors.New("Namespace exhausted")
+		}
+
+		for true {
+			r.generateName()
+			if !record[*r] {
+				break
+			}
+		}
+
+		record[*r] = true
+
+		return string(*r), nil
 	}
 	return string(*r), nil
 }
 
-func (r *Robot) generateName() (string, error) {
-	var bName []rune
+func (r *Robot) generateName() {
+	s1, s2 := string(rand.Intn(26)+'A'), string(rand.Intn(26)+'A')
+	number := rand.Intn(1000)
 
-	if len(record) > (26*26*10*10*10 - 1) {
-		return "", errors.New("Namespace exhausted")
-	}
+	*r = Robot(fmt.Sprintf("%s%s%3d", s1, s2, number))
+}
 
+// Reset Delete the name of the robot and regenerate its name
+func (r *Robot) Reset() (string, error) {
 	for true {
-		bName = append(bName, rune('A')+rune(rand.Intn(26)))
-		bName = append(bName, rune('A')+rune(rand.Intn(26)))
-		bName = append(bName, rune('0')+rune(rand.Intn(10)))
-		bName = append(bName, rune('0')+rune(rand.Intn(10)))
-		bName = append(bName, rune('0')+rune(rand.Intn(10)))
-
-		*r = Robot(bName)
-
+		r.generateName()
 		if !record[*r] {
 			break
 		}
@@ -43,9 +52,4 @@ func (r *Robot) generateName() (string, error) {
 	record[*r] = true
 
 	return string(*r), nil
-}
-
-// Reset Delete the name of the robot and regenerate its name
-func (r *Robot) Reset() (string, error) {
-	return r.generateName()
 }
