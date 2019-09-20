@@ -19,11 +19,10 @@ func (r *Robot) Name() (string, error) {
 			return "", errors.New("Namespace exhausted")
 		}
 
-		for true {
+		r.generateName()
+
+		for record[r.RobotName] {
 			r.generateName()
-			if !record[r.RobotName] {
-				break
-			}
 		}
 
 		record[r.RobotName] = true
