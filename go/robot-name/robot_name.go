@@ -14,19 +14,22 @@ var record = make(map[string]bool)
 // Name Generate a rondom name for robot and
 // return the name
 func (r *Robot) Name() (string, error) {
-	if r.RobotName == "" {
-		if len(record) > (26*26*10*10*10 - 1) {
-			return "", errors.New("Namespace exhausted")
-		}
-
-		r.generateName()
-
-		for record[r.RobotName] {
-			r.generateName()
-		}
-
-		record[r.RobotName] = true
+	if r.RobotName != "" {
+		return r.RobotName, nil
 	}
+
+	if len(record) >= 26*26*10*10*10 {
+		return "", errors.New("Namespace exhausted")
+	}
+
+	r.generateName()
+
+	for record[r.RobotName] {
+		r.generateName()
+	}
+
+	record[r.RobotName] = true
+
 	return r.RobotName, nil
 }
 
@@ -39,14 +42,6 @@ func (r *Robot) generateName() {
 
 // Reset Delete the name of the robot and regenerate its name
 func (r *Robot) Reset() (string, error) {
-	for true {
-		r.generateName()
-		if !record[r.RobotName] {
-			break
-		}
-	}
-
-	record[r.RobotName] = true
-
-	return r.RobotName, nil
+	r.RobotName = ""
+	return r.Name()
 }
